@@ -1,0 +1,25 @@
+body {
+    width: 200px;
+    padding: 10px;
+    font-family: Arial, sans-serif;
+  }
+  
+  button {
+    width: 100%;
+    padding: 8px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }
+
+  .centered-icon {
+    display: block;
+    margin: auto;
+  }
+  

@@ -1,0 +1,26 @@
+{
+    "manifest_version": 2,
+    "name": "Job Tracker",
+    "version": "1.0",
+    "description": "Track job postings to Excel",
+    "browser_action": {
+      "default_icon": {
+        "16": "icons/JobSync-logos_white.png",
+        "48": "icons/JobSync-logos_white.png",
+        "128": "icons/JobSync-logos_white.png"
+      },
+      "default_popup": "popup.html"
+    },
+    "permissions": ["activeTab", "storage", "https://github.com/", "https://www.googleapis.com/"],
+    "content_scripts": [
+      {
+        "matches": ["https://github.com/SimplifyJobs/Summer2024-Internships*"],
+        "js": ["content.js"]
+      }
+    ],
+    "background": {
+      "scripts": ["background.js"],
+      "persistent": false
+    }
+  }
+  
