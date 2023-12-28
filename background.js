@@ -5,17 +5,17 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   if (changeInfo.url && isSimplifyInternshipPage(changeInfo.url)) {
     chrome.browserAction.setIcon({
       path: {
-        "16": "icons/JobSync-logos.jpeg",
-        "48": "icons/JobSync-logos.jpeg",
-        "128": "icons/JobSync-logos.jpeg"
+        "16": "JobSync-logos.jpeg",
+        "48": "JobSync-logos.jpeg",
+        "128": "JobSync-logos.jpeg"
       }
     });
   } else {
-    chrome.browserAction.setIcon({
+    chrome.action.setIcon({
       path: {
-        "16": "icons/JobSync-logos_white.png",
-        "48": "icons/JobSync-logos_white.png",
-        "128": "icons/JobSync-logos_white.png"
+        "16": "JobSync-logos_white.png",
+        "48": "JobSync-logos_white.png",
+        "128": "JobSync-logos_white.png"
       }
     });
   }
