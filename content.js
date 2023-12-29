@@ -43,6 +43,17 @@ function untrackJob(job) {
     console.error('Error in untrackJob:', error);
   }
 }
+
+function createTrackingIcon() {
+  const icon = document.createElement('img');
+  icon.src = 'https://upload.wikimedia.org/wikipedia/commons/2/2d/Basic_green_dot.png';
+  icon.alt = 'Track Job';
+  icon.classList.add('centered-icon');
+  icon.style.cursor = 'pointer';
+
+  return icon;
+}
+
 function applyTrackingIcons() {
   const jobTable = findJobTable();
   if (!jobTable) {
@@ -51,34 +62,31 @@ function applyTrackingIcons() {
   }
 
   const jobRows = jobTable.querySelectorAll('tbody > tr');
-  const top50JobRows = Array.from(jobRows).slice(0, 50);
 
-  top50JobRows.forEach(jobRow => {
-    const jobTitleElement = jobRow.querySelector('td:nth-child(2)');
-    const locationElement = jobRow.querySelector('td:nth-child(3)');
-    const datePostedElement = jobRow.querySelector('td:nth-child(5)');
-
-    const jobTitle = jobTitleElement?.innerText || 'N/A';
-    const location = locationElement?.innerText || 'N/A';
-    const datePosted = datePostedElement?.innerText || 'N/A';
-
-    console.log('Job Tracked:', { jobTitle, location, datePosted });
-
-    const icon = document.createElement('img');
-    icon.src = 'https://upload.wikimedia.org/wikipedia/commons/2/2d/Basic_green_dot.png';
-    icon.alt = 'Track Job';
-    icon.classList.add('centered-icon');
-
-    const trackedJobs = getTrackedJobs();
-    const isJobTracked = trackedJobs.some(job => job.title === jobTitle && job.location === location);
+  jobRows.forEach(jobRow => {
+    const icon = createTrackingIcon(); // Create an icon without querying initially
+    jobRow.appendChild(icon);
 
     icon.addEventListener('click', () => {
+      const jobTitleElement = jobRow.querySelector('td:nth-child(2)');
+      const locationElement = jobRow.querySelector('td:nth-child(3)');
+      const datePostedElement = jobRow.querySelector('td:nth-child(5)');
+
+      const jobTitle = jobTitleElement?.innerText || 'N/A';
+      const location = locationElement?.innerText || 'N/A';
+      const datePosted = datePostedElement?.innerText || 'N/A';
+
+      const trackedJobs = getTrackedJobs();
+      const isJobTracked = trackedJobs.some(job => job.title === jobTitle && job.location === location);
+
       if (isJobTracked) {
         untrackJob({ title: jobTitle, location, datePosted }); // Untrack the job
         console.log('Icon clicked! Job untracked.');
+        icon.style.filter = 'grayscale(100%)'; // Apply the grayscale filter for untracked color
       } else {
         trackJob({ title: jobTitle, location, datePosted }); // Track the job
         console.log('Icon clicked! Job tracked.');
+        icon.style.filter = ''; // Reset the grayscale filter for tracked color
       }
 
       // Update trackedJobs and store in localStorage
@@ -88,28 +96,15 @@ function applyTrackingIcons() {
       if (existingJobIndex !== -1) {
         // Job is already tracked, so untrack it
         updatedTrackedJobs.splice(existingJobIndex, 1);
-        icon.style.filter = 'grayscale(100%)'; // Apply the grayscale filter for untracked color
       } else {
         // Job is not tracked, so track it
         updatedTrackedJobs.push({ title: jobTitle, location, datePosted });
-        icon.style.filter = ''; // Reset the grayscale filter for tracked color
       }
 
       localStorage.setItem('trackedJobs', JSON.stringify(updatedTrackedJobs));
     });
-
-    icon.style.cursor = 'pointer';
-
-    if (isJobTracked) {
-      icon.style.filter = ''; // Reset the grayscale filter for tracked color
-    } else {
-      icon.style.filter = 'grayscale(100%)'; // Apply the grayscale filter for untracked color
-    }
-
-    jobRow.appendChild(icon);
   });
 }
-
 
 // Apply tracking icons when the content script is loaded
 applyTrackingIcons();
