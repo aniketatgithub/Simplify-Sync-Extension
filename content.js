@@ -56,7 +56,6 @@ function createTrackingIcon(jobTitle, location, datePosted, isJobTracked) {
 
   return icon;
 }
-
 function applyTrackingIcons() {
   const jobTable = findJobTable();
   if (!jobTable) {
@@ -89,6 +88,9 @@ function applyTrackingIcons() {
         const icon = createTrackingIcon(jobTitle, location, datePosted, isJobTracked);
         jobRow.appendChild(icon);
 
+        // Update icon color after the state change
+        icon.style.filter = isJobTracked ? 'grayscale(100%)' : ''; // Swap colors
+
         icon.addEventListener('click', () => {
           // Toggle the tracking state
           if (isJobTracked) {
@@ -110,9 +112,6 @@ function applyTrackingIcons() {
           }
 
           localStorage.setItem('trackedJobs', JSON.stringify(updatedTrackedJobs));
-
-          // Update icon color after the state change
-          icon.style.filter = isJobTracked ? 'grayscale(100%)' : ''; // Swap colors
         });
 
         // Unobserve the row once the icon is added
@@ -126,6 +125,7 @@ function applyTrackingIcons() {
     observer.observe(jobRow);
   });
 }
+
 
 // Apply tracking icons when the content script is loaded
 applyTrackingIcons();
