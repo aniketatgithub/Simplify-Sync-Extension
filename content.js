@@ -35,6 +35,15 @@ function trackJob(job) {
   }
 }
 
+function untrackJob(job) {
+  try {
+    // Inform the background script about the untracked job
+    chrome.runtime.sendMessage({ action: 'jobUntracked', job });
+  } catch (error) {
+    console.error('Error in untrackJob:', error);
+  }
+}
+
 function applyTrackingIcons() {
   const jobTable = findJobTable();
   if (!jobTable) {
@@ -64,23 +73,36 @@ function applyTrackingIcons() {
     const trackedJobs = getTrackedJobs();
     const isJobTracked = trackedJobs.some(job => job.title === jobTitle && job.location === location);
 
+    icon.addEventListener('click', () => {
+      if (isJobTracked) {
+        untrackJob({ title: jobTitle, location, datePosted }); // Untrack the job
+        console.log('Icon clicked! Job untracked.');
+      } else {
+        trackJob({ title: jobTitle, location, datePosted }); // Track the job
+        console.log('Icon clicked! Job tracked.');
+      }
+
+      // Update trackedJobs and store in localStorage
+      const updatedTrackedJobs = getTrackedJobs();
+      const existingJobIndex = updatedTrackedJobs.findIndex(job => job.title === jobTitle && job.location === location);
+
+      if (existingJobIndex !== -1) {
+        // Job is already tracked, so untrack it
+        updatedTrackedJobs.splice(existingJobIndex, 1);
+        icon.style.filter = ''; // Reset the grayscale filter
+      } else {
+        // Job is not tracked, so track it
+        updatedTrackedJobs.push({ title: jobTitle, location, datePosted });
+        icon.style.filter = 'grayscale(100%)';
+      }
+
+      localStorage.setItem('trackedJobs', JSON.stringify(updatedTrackedJobs));
+    });
+
+    icon.style.cursor = 'pointer';
+
     if (isJobTracked) {
       icon.style.filter = 'grayscale(100%)';
-    } else {
-      icon.addEventListener('click', () => {
-        trackJob({ title: jobTitle, location, datePosted });
-        console.log('Icon clicked! Job tracked.');
-
-        // Update trackedJobs and store in localStorage
-        const updatedTrackedJobs = getTrackedJobs();
-        updatedTrackedJobs.push({ title: jobTitle, location, datePosted });
-        localStorage.setItem('trackedJobs', JSON.stringify(updatedTrackedJobs));
-
-        icon.style.filter = 'grayscale(100%)';
-        icon.removeEventListener('click', () => {});
-      });
-
-      icon.style.cursor = 'pointer';
     }
 
     jobRow.appendChild(icon);
@@ -102,4 +124,3 @@ function clearTrackedJobs() {
   localStorage.removeItem('trackedJobs');
   console.log('Tracked jobs cleared.');
 }
-
