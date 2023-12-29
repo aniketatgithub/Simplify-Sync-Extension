@@ -44,12 +44,15 @@ function untrackJob(job) {
   }
 }
 
-function createTrackingIcon() {
+function createTrackingIcon(jobTitle, location, datePosted, isJobTracked) {
   const icon = document.createElement('img');
   icon.src = 'https://upload.wikimedia.org/wikipedia/commons/2/2d/Basic_green_dot.png';
   icon.alt = 'Track Job';
   icon.classList.add('centered-icon');
   icon.style.cursor = 'pointer';
+
+  // Set color for tracked or untracked state
+  icon.style.filter = isJobTracked ? 'grayscale(100%)' : ''; // Swap colors
 
   return icon;
 }
@@ -63,46 +66,64 @@ function applyTrackingIcons() {
 
   const jobRows = jobTable.querySelectorAll('tbody > tr');
 
-  jobRows.forEach(jobRow => {
-    const icon = createTrackingIcon(); // Create an icon without querying initially
-    jobRow.appendChild(icon);
+  // Intersection Observer options
+  const options = {
+    threshold: 0.5, // Adjust as needed
+  };
 
-    icon.addEventListener('click', () => {
-      const jobTitleElement = jobRow.querySelector('td:nth-child(2)');
-      const locationElement = jobRow.querySelector('td:nth-child(3)');
-      const datePostedElement = jobRow.querySelector('td:nth-child(5)');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const jobRow = entry.target;
+        const jobTitleElement = jobRow.querySelector('td:nth-child(2)');
+        const locationElement = jobRow.querySelector('td:nth-child(3)');
+        const datePostedElement = jobRow.querySelector('td:nth-child(5)');
 
-      const jobTitle = jobTitleElement?.innerText || 'N/A';
-      const location = locationElement?.innerText || 'N/A';
-      const datePosted = datePostedElement?.innerText || 'N/A';
+        const jobTitle = jobTitleElement?.innerText || 'N/A';
+        const location = locationElement?.innerText || 'N/A';
+        const datePosted = datePostedElement?.innerText || 'N/A';
 
-      const trackedJobs = getTrackedJobs();
-      const isJobTracked = trackedJobs.some(job => job.title === jobTitle && job.location === location);
+        const trackedJobs = getTrackedJobs();
+        const isJobTracked = trackedJobs.some(job => job.title === jobTitle && job.location === location);
 
-      if (isJobTracked) {
-        untrackJob({ title: jobTitle, location, datePosted }); // Untrack the job
-        console.log('Icon clicked! Job untracked.');
-        icon.style.filter = 'grayscale(100%)'; // Apply the grayscale filter for untracked color
-      } else {
-        trackJob({ title: jobTitle, location, datePosted }); // Track the job
-        console.log('Icon clicked! Job tracked.');
-        icon.style.filter = ''; // Reset the grayscale filter for tracked color
+        const icon = createTrackingIcon(jobTitle, location, datePosted, isJobTracked);
+        jobRow.appendChild(icon);
+
+        icon.addEventListener('click', () => {
+          // Toggle the tracking state
+          if (isJobTracked) {
+            untrackJob({ title: jobTitle, location, datePosted });
+            console.log('Icon clicked! Job untracked.');
+          } else {
+            trackJob({ title: jobTitle, location, datePosted });
+            console.log('Icon clicked! Job tracked.');
+          }
+
+          // Update trackedJobs and store in localStorage
+          const updatedTrackedJobs = getTrackedJobs();
+          const existingJobIndex = updatedTrackedJobs.findIndex(job => job.title === jobTitle && job.location === location);
+
+          if (existingJobIndex !== -1) {
+            updatedTrackedJobs.splice(existingJobIndex, 1);
+          } else {
+            updatedTrackedJobs.push({ title: jobTitle, location, datePosted });
+          }
+
+          localStorage.setItem('trackedJobs', JSON.stringify(updatedTrackedJobs));
+
+          // Update icon color after the state change
+          icon.style.filter = isJobTracked ? 'grayscale(100%)' : ''; // Swap colors
+        });
+
+        // Unobserve the row once the icon is added
+        observer.unobserve(jobRow);
       }
-
-      // Update trackedJobs and store in localStorage
-      const updatedTrackedJobs = getTrackedJobs();
-      const existingJobIndex = updatedTrackedJobs.findIndex(job => job.title === jobTitle && job.location === location);
-
-      if (existingJobIndex !== -1) {
-        // Job is already tracked, so untrack it
-        updatedTrackedJobs.splice(existingJobIndex, 1);
-      } else {
-        // Job is not tracked, so track it
-        updatedTrackedJobs.push({ title: jobTitle, location, datePosted });
-      }
-
-      localStorage.setItem('trackedJobs', JSON.stringify(updatedTrackedJobs));
     });
+  }, options);
+
+  // Observe each job row
+  jobRows.forEach(jobRow => {
+    observer.observe(jobRow);
   });
 }
 
