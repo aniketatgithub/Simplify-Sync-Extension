@@ -1,3 +1,5 @@
+// tracked_jobs.js
+
 document.addEventListener('DOMContentLoaded', function () {
     var trackedJobsList = document.getElementById('trackedJobsList');
 
