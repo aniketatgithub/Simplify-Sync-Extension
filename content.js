@@ -43,7 +43,6 @@ function untrackJob(job) {
     console.error('Error in untrackJob:', error);
   }
 }
-
 function applyTrackingIcons() {
   const jobTable = findJobTable();
   if (!jobTable) {
@@ -89,11 +88,11 @@ function applyTrackingIcons() {
       if (existingJobIndex !== -1) {
         // Job is already tracked, so untrack it
         updatedTrackedJobs.splice(existingJobIndex, 1);
-        icon.style.filter = ''; // Reset the grayscale filter
+        icon.style.filter = 'grayscale(100%)'; // Apply the grayscale filter for untracked color
       } else {
         // Job is not tracked, so track it
         updatedTrackedJobs.push({ title: jobTitle, location, datePosted });
-        icon.style.filter = 'grayscale(100%)';
+        icon.style.filter = ''; // Reset the grayscale filter for tracked color
       }
 
       localStorage.setItem('trackedJobs', JSON.stringify(updatedTrackedJobs));
@@ -102,12 +101,15 @@ function applyTrackingIcons() {
     icon.style.cursor = 'pointer';
 
     if (isJobTracked) {
-      icon.style.filter = 'grayscale(100%)';
+      icon.style.filter = ''; // Reset the grayscale filter for tracked color
+    } else {
+      icon.style.filter = 'grayscale(100%)'; // Apply the grayscale filter for untracked color
     }
 
     jobRow.appendChild(icon);
   });
 }
+
 
 // Apply tracking icons when the content script is loaded
 applyTrackingIcons();
