@@ -1,5 +1,4 @@
-// Detect Simplify Internship Page and inform background script. give me fully edited content.js i will just copy and pase . write all the functions of this as i have lost the file
- 
+// Detect Simplify Internship Page and inform background script
 const elements = document.querySelectorAll('.Box-sc-g0xbh4-0.bJMeLZ.js-snippet-clipboard-copy-unpositioned');
 
 // Iterate over the found elements and override padding
@@ -23,10 +22,17 @@ function findJobTable() {
         headerTexts.includes('application/link') &&
         headerTexts.includes('date posted')
       ) {
+        // Add two more columns
+        const appliedHeader = document.createElement('th');
+        appliedHeader.innerText = 'Applied';
+        headers[headers.length - 1].insertAdjacentElement('afterend', appliedHeader);
+
+        const dateAppliedHeader = document.createElement('th');
+        dateAppliedHeader.innerText = 'Date Applied';
+        headers[headers.length - 1].insertAdjacentElement('afterend', dateAppliedHeader);
+
         // Apply styles to the table
-        table.style.overflow = 'visible';
-        table.style.maxWidth = '95%';
-        
+
         return table;
       }
     }
@@ -120,6 +126,12 @@ function createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTr
 
   iconContainer.appendChild(icon);
 
+  // Append applied information to the row
+  const appliedElement = document.createElement('div');
+  appliedElement.innerText = isJobTracked ? 'Yes' : 'No';
+  appliedElement.classList.add('applied');
+  iconContainer.appendChild(appliedElement);
+
   // Append trackedDate information to the row
   const trackedDateElement = document.createElement('div');
   trackedDateElement.innerText = trackedDate ? formatDate(trackedDate) : '';
@@ -181,6 +193,7 @@ function applyTrackingIcons() {
 function updateTrackingInfo(jobTitle, location, datePosted, trackedDate, isJobTracked, jobRow) {
   const iconContainer = jobRow.querySelector('.icon-container');
   if (iconContainer) {
+    const appliedElement = iconContainer.querySelector('.applied');
     const trackedDateElement = iconContainer.querySelector('.tracked-date');
     const icon = iconContainer.querySelector('img');
 
@@ -191,6 +204,9 @@ function updateTrackingInfo(jobTitle, location, datePosted, trackedDate, isJobTr
     icon.src = isJobTracked
       ? 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png'
       : 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png'; // Adjust the source URLs as needed
+
+    // Update applied information
+    appliedElement.innerText = isJobTracked ? 'Yes' : 'No';
 
     // Update trackedDate information
     trackedDateElement.innerText = trackedDate ? formatDate(trackedDate) : '';
@@ -239,8 +255,8 @@ function formatDate(dateTimeString) {
     minute: '2-digit',
   });
 
-  // Combine formatted date and time
-  const result = `${formattedDate} ${formattedTime}`;
+  // Combine formatted date and time on the same line
+  const result = `${formattedDate} ${formattedTime}`.replace(/\r?\n|\r/g, ' ');
   return result;
 }
 
@@ -278,19 +294,21 @@ const styles = `
   }
 
   .icon-container {
-    margin-top: 100%;
     display: flex;
     align-items: center;
-    height: 100%; /* Ensure the icon container takes the full height of the row */
   }
 
   .icon-container img {
+    margin-right: 2px; /* 2px border between icons and date+time */
     flex: 1; /* Allow the image to grow within the container */
     object-fit: contain; /* Maintain aspect ratio while filling the container */
   }
 
+  .applied {
+    font-size: 12px; /* Adjust the font size as needed */
+  }
+
   .tracked-date {
-    margin-left: 5px; /* Adjust as needed */
     font-size: 12px; /* Adjust the font size as needed */
   }
 `;
