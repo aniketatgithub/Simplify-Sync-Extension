@@ -1,5 +1,3 @@
-// content.js
-
 chrome.runtime.sendMessage({ action: 'detectSimplifyInternshipPage', detected: true });
 
 function findJobTable() {
@@ -44,7 +42,7 @@ function untrackJob(job) {
   }
 }
 
-function createTrackingIcon(jobTitle, location, datePosted, isJobTracked) {
+function createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTracked) {
   const iconContainer = document.createElement('div');
   iconContainer.classList.add('icon-container');
 
@@ -54,7 +52,7 @@ function createTrackingIcon(jobTitle, location, datePosted, isJobTracked) {
   icon.style.cursor = 'pointer';
 
   // Set color for tracked or untracked state
-  icon.style.filter = isJobTracked ? '' : 'grayscale(100%)'  ; // Swap colors
+  icon.style.filter = isJobTracked ? '' : 'grayscale(100%)';
 
   // Change the image source based on the tracking state
   icon.src = 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png';
@@ -64,12 +62,7 @@ function createTrackingIcon(jobTitle, location, datePosted, isJobTracked) {
     isJobTracked = !isJobTracked;
 
     // Change the image source dynamically after the click event
-    // icon.filter = isJobTracked
-    //   ? 'grayscale(100%)'
-    //   : 'grayscale(0%)'; /// i changed this
-
-    // Update the grayscale filter based on the new tracking state
-    icon.style.filter = isJobTracked ? '' : 'grayscale(100%)'  ;
+    icon.style.filter = isJobTracked ? '' : 'grayscale(100%)';
 
     // Update the tracking state for the next click
     if (isJobTracked) {
@@ -84,6 +77,12 @@ function createTrackingIcon(jobTitle, location, datePosted, isJobTracked) {
   });
 
   iconContainer.appendChild(icon);
+
+  // Append trackedDate information to the row
+  const trackedDateElement = document.createElement('div');
+  trackedDateElement.innerText = trackedDate || 'N/A';
+  trackedDateElement.classList.add('tracked-date');
+  iconContainer.appendChild(trackedDateElement);
 
   return iconContainer;
 }
@@ -115,9 +114,12 @@ function applyTrackingIcons() {
         const datePosted = datePostedElement?.innerText || 'N/A';
 
         const trackedJobs = getTrackedJobs();
-        const isJobTracked = trackedJobs.some(job => job.title === jobTitle && job.location === location);
+        const trackedJob = trackedJobs.find(job => job.title === jobTitle && job.location === location);
 
-        const icon = createTrackingIcon(jobTitle, location, datePosted, isJobTracked);
+        const isJobTracked = !!trackedJob;
+        const trackedDate = trackedJob ? trackedJob.trackedDate : null;
+
+        const icon = createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTracked);
         jobRow.appendChild(icon);
 
         icon.addEventListener('click', () => {
@@ -186,6 +188,10 @@ const styles = `
   .icon-container img {
     flex: 1; /* Allow the image to grow within the container */
     object-fit: contain; /* Maintain aspect ratio while filling the container */
+  }
+
+  .tracked-date {
+    margin-left: 5px; /* Adjust as needed */
   }
 `;
 
