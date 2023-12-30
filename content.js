@@ -1,5 +1,15 @@
+// Detect Simplify Internship Page and inform background script. give me fully edited content.js i will just copy and pase . write all the functions of this as i have lost the file
+ 
+const elements = document.querySelectorAll('.Box-sc-g0xbh4-0.bJMeLZ.js-snippet-clipboard-copy-unpositioned');
+
+// Iterate over the found elements and override padding
+elements.forEach(element => {
+  element.style.padding = '0px';
+});
+
 chrome.runtime.sendMessage({ action: 'detectSimplifyInternshipPage', detected: true });
 
+// Function to find the job table in the page
 function findJobTable() {
   const tables = document.querySelectorAll('table');
   for (const table of tables) {
@@ -13,6 +23,10 @@ function findJobTable() {
         headerTexts.includes('application/link') &&
         headerTexts.includes('date posted')
       ) {
+        // Apply styles to the table
+        table.style.overflow = 'visible';
+        table.style.maxWidth = '95%';
+        
         return table;
       }
     }
@@ -20,28 +34,47 @@ function findJobTable() {
   return null;
 }
 
+// Function to apply styles to the specified layout
+function applyLayoutStyles() {
+  const layoutElement = document.querySelector('.Layout--flowRow-until-md.react-repos-overview-margin.Layout--sidebarPosition-end.Layout--sidebarPosition-flowRow-end');
+
+  if (layoutElement) {
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = `
+      @media (min-width: 1012px) {
+        .Layout {
+          --Layout-sidebar-width: 240px;
+        }
+      }
+    `;
+    document.head.appendChild(styleElement);
+  }
+}
+
+// Function to retrieve tracked jobs from localStorage
 function getTrackedJobs() {
   return JSON.parse(localStorage.getItem('trackedJobs')) || [];
 }
 
+// Function to inform the background script about a tracked job
 function trackJob(job) {
   try {
-    // Inform the background script about the tracked job
     chrome.runtime.sendMessage({ action: 'jobTracked', job });
   } catch (error) {
     console.error('Error in trackJob:', error);
   }
 }
 
+// Function to inform the background script about an untracked job
 function untrackJob(job) {
   try {
-    // Inform the background script about the untracked job
     chrome.runtime.sendMessage({ action: 'jobUntracked', job });
   } catch (error) {
     console.error('Error in untrackJob:', error);
   }
 }
 
+// Function to create tracking icons for jobs
 function createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTracked, jobRow) {
   const iconContainer = document.createElement('div');
   iconContainer.classList.add('icon-container');
@@ -50,6 +83,10 @@ function createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTr
   icon.alt = 'Track Job';
   icon.classList.add('centered-icon');
   icon.style.cursor = 'pointer';
+
+  // Set a fixed width and height for consistency
+  icon.style.width = '20px';
+  icon.style.height = '20px';
 
   // Set color for tracked or untracked state
   icon.style.filter = isJobTracked ? '' : 'grayscale(100%)';
@@ -85,13 +122,14 @@ function createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTr
 
   // Append trackedDate information to the row
   const trackedDateElement = document.createElement('div');
-  trackedDateElement.innerText = trackedDate || '';
+  trackedDateElement.innerText = trackedDate ? formatDate(trackedDate) : '';
   trackedDateElement.classList.add('tracked-date');
   iconContainer.appendChild(trackedDateElement);
 
   return iconContainer;
 }
 
+// Function to apply tracking icons to job rows
 function applyTrackingIcons() {
   const jobTable = findJobTable();
   if (!jobTable) {
@@ -139,7 +177,7 @@ function applyTrackingIcons() {
   });
 }
 
-// Update tracking information in the UI immediately
+// Function to update tracking information in the UI immediately
 function updateTrackingInfo(jobTitle, location, datePosted, trackedDate, isJobTracked, jobRow) {
   const iconContainer = jobRow.querySelector('.icon-container');
   if (iconContainer) {
@@ -155,7 +193,7 @@ function updateTrackingInfo(jobTitle, location, datePosted, trackedDate, isJobTr
       : 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png'; // Adjust the source URLs as needed
 
     // Update trackedDate information
-    trackedDateElement.innerText = trackedDate || '';
+    trackedDateElement.innerText = trackedDate ? formatDate(trackedDate) : '';
   }
 
   // Update local storage
@@ -166,10 +204,10 @@ function updateTrackingInfo(jobTitle, location, datePosted, trackedDate, isJobTr
 
   if (isJobTracked) {
     const currentDate = new Date();
-    const formattedDate = `${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString([], {
+    const formattedDate = formatDate(`${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
-    })}`;
+    })}`);
 
     if (existingJobIndex !== -1) {
       updatedTrackedJobs[existingJobIndex].trackedDate = formattedDate;
@@ -185,9 +223,34 @@ function updateTrackingInfo(jobTitle, location, datePosted, trackedDate, isJobTr
   localStorage.setItem('trackedJobs', JSON.stringify(updatedTrackedJobs));
 }
 
+// Function to format date without the year and time
+function formatDate(dateTimeString) {
+  const date = new Date(dateTimeString);
+
+  // Format date
+  const formattedDate = date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+  });
+
+  // Format time
+  const formattedTime = date.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  // Combine formatted date and time
+  const result = `${formattedDate} ${formattedTime}`;
+  return result;
+}
+
 // Apply tracking icons when the content script is loaded
 applyTrackingIcons();
 
+// Apply styles to the specified layout
+applyLayoutStyles();
+
+// Listen for messages from the background script
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.action === 'clearTrackedJobs') {
     clearTrackedJobs();
@@ -196,7 +259,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   }
 });
 
-
+// Function to clear tracked jobs
 function clearTrackedJobs() {
   console.log('Clear tracked jobs function called.');
   // Clear tracked jobs data from localStorage
@@ -208,10 +271,8 @@ function clearTrackedJobs() {
 
 const styles = `
   .centered-icon {
-    max-width: 30px; /* Adjust the width as needed */
-    max-height: 30px; /* Adjust the height as needed */
-    width: auto;
-    height: auto;
+    width: 20px; /* Set a fixed width for consistency */
+    height: 20px; /* Set a fixed height for consistency */
     margin: auto;
     display: block;
   }
@@ -230,6 +291,7 @@ const styles = `
 
   .tracked-date {
     margin-left: 5px; /* Adjust as needed */
+    font-size: 12px; /* Adjust the font size as needed */
   }
 `;
 
