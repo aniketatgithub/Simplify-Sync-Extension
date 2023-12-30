@@ -54,7 +54,7 @@ function createTrackingIcon(jobTitle, location, datePosted, isJobTracked) {
   icon.style.cursor = 'pointer';
 
   // Set color for tracked or untracked state
-  icon.style.filter = isJobTracked ? 'grayscale(100%)' : ''; // Swap colors
+  icon.style.filter = isJobTracked ? '' : 'grayscale(100%)'  ; // Swap colors
 
   // Change the image source based on the tracking state
   icon.src = 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png';
@@ -64,16 +64,18 @@ function createTrackingIcon(jobTitle, location, datePosted, isJobTracked) {
     isJobTracked = !isJobTracked;
 
     // Change the image source dynamically after the click event
-    icon.filter = isJobTracked
-      ? 'grayscale(100%)'
-      : 'grayscale(0%)';
+    // icon.filter = isJobTracked
+    //   ? 'grayscale(100%)'
+    //   : 'grayscale(0%)'; /// i changed this
 
     // Update the grayscale filter based on the new tracking state
-    icon.style.filter = isJobTracked ? 'grayscale(100%)' : '';
+    icon.style.filter = isJobTracked ? '' : 'grayscale(100%)'  ;
 
     // Update the tracking state for the next click
     if (isJobTracked) {
-      trackJob({ title: jobTitle, location, datePosted });
+      const currentDate = new Date();
+      const formattedDate = `${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      trackJob({ title: jobTitle, location, datePosted, trackedDate: formattedDate });
       console.log('Icon clicked! Job tracked.');
     } else {
       untrackJob({ title: jobTitle, location, datePosted });
@@ -126,7 +128,9 @@ function applyTrackingIcons() {
           if (existingJobIndex !== -1) {
             updatedTrackedJobs.splice(existingJobIndex, 1);
           } else {
-            updatedTrackedJobs.push({ title: jobTitle, location, datePosted });
+            const currentDate = new Date();
+            const formattedDate = `${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            updatedTrackedJobs.push({ title: jobTitle, location, datePosted, trackedDate: formattedDate });
           }
 
           localStorage.setItem('trackedJobs', JSON.stringify(updatedTrackedJobs));
@@ -184,8 +188,6 @@ const styles = `
     object-fit: contain; /* Maintain aspect ratio while filling the container */
   }
 `;
-
-
 
 const styleElement = document.createElement('style');
 styleElement.innerHTML = styles;
