@@ -45,6 +45,9 @@ function untrackJob(job) {
 }
 
 function createTrackingIcon(jobTitle, location, datePosted, isJobTracked) {
+  const iconContainer = document.createElement('div');
+  iconContainer.classList.add('icon-container');
+
   const icon = document.createElement('img');
   icon.alt = 'Track Job';
   icon.classList.add('centered-icon');
@@ -78,10 +81,10 @@ function createTrackingIcon(jobTitle, location, datePosted, isJobTracked) {
     }
   });
 
-  return icon;
+  iconContainer.appendChild(icon);
+
+  return iconContainer;
 }
-
-
 
 function applyTrackingIcons() {
   const jobTable = findJobTable();
@@ -117,17 +120,6 @@ function applyTrackingIcons() {
 
         icon.addEventListener('click', () => {
           // Toggle the tracking state
-          // if (isJobTracked) {
-          //   untrackJob({ title: jobTitle, location, datePosted });
-          //   console.log('Icon clicked! Job untracked.');
-          //   icon.src = 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png';
-          // } else {
-          //   trackJob({ title: jobTitle, location, datePosted });
-          //   console.log('Icon clicked! Job tracked.');
-          //   icon.src = 'https://toppng.com/uploads/preview/blue-dot-circle-icon-116420329010b2hxeeljn.png';
-          // }
-
-          // Update trackedJobs and store in localStorage
           const updatedTrackedJobs = getTrackedJobs();
           const existingJobIndex = updatedTrackedJobs.findIndex(job => job.title === jobTitle && job.location === location);
           
@@ -152,7 +144,6 @@ function applyTrackingIcons() {
   });
 }
 
-
 // Apply tracking icons when the content script is loaded
 applyTrackingIcons();
 
@@ -168,3 +159,34 @@ function clearTrackedJobs() {
   localStorage.removeItem('trackedJobs');
   console.log('Tracked jobs cleared.');
 }
+
+// Add the following styles at the end of your content.js file
+
+const styles = `
+  .centered-icon {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    margin: auto;
+    display: block;
+  }
+
+  .icon-container {
+    margin-top: 100%;
+    display: flex;
+    align-items: center;
+    height: 100%; /* Ensure the icon container takes the full height of the row */
+  }
+
+  .icon-container img {
+    flex: 1; /* Allow the image to grow within the container */
+    object-fit: contain; /* Maintain aspect ratio while filling the container */
+  }
+`;
+
+
+
+const styleElement = document.createElement('style');
+styleElement.innerHTML = styles;
+document.head.appendChild(styleElement);
