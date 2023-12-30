@@ -54,34 +54,33 @@ function createTrackingIcon(jobTitle, location, datePosted, isJobTracked) {
   icon.style.filter = isJobTracked ? 'grayscale(100%)' : ''; // Swap colors
 
   // Change the image source based on the tracking state
-  icon.src = isJobTracked
-    ? 'https://toppng.com/uploads/preview/blue-dot-circle-icon-116420329010b2hxeeljn.png'
-    : 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png';
+  icon.src = 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png';
 
   icon.addEventListener('click', () => {
     // Toggle the tracking state
-    if (isJobTracked) {
-      untrackJob({ title: jobTitle, location, datePosted });
-      console.log('Icon clicked! Job untracked.');
-    } else {
-      trackJob({ title: jobTitle, location, datePosted });
-      console.log('Icon clicked! Job tracked.');
-    }
-
-    // Update the tracking state for the next click
     isJobTracked = !isJobTracked;
 
     // Change the image source dynamically after the click event
-    icon.src = isJobTracked
-      ? 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png'
-      : 'https://toppng.com/uploads/preview/blue-dot-circle-icon-116420329010b2hxeeljn.png';
+    icon.filter = isJobTracked
+      ? 'grayscale(100%)'
+      : 'grayscale(0%)';
 
     // Update the grayscale filter based on the new tracking state
     icon.style.filter = isJobTracked ? 'grayscale(100%)' : '';
+
+    // Update the tracking state for the next click
+    if (isJobTracked) {
+      trackJob({ title: jobTitle, location, datePosted });
+      console.log('Icon clicked! Job tracked.');
+    } else {
+      untrackJob({ title: jobTitle, location, datePosted });
+      console.log('Icon clicked! Job untracked.');
+    }
   });
 
   return icon;
 }
+
 
 
 function applyTrackingIcons() {
@@ -118,18 +117,15 @@ function applyTrackingIcons() {
 
         icon.addEventListener('click', () => {
           // Toggle the tracking state
-          if (isJobTracked) {
-            untrackJob({ title: jobTitle, location, datePosted });
-            console.log('Icon clicked! Job untracked.');
-       
-            icon.src = 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png';
- 
-            
-          } else {
-            trackJob({ title: jobTitle, location, datePosted });
-            console.log('Icon clicked! Job tracked.');
-            icon.src = 'https://toppng.com/uploads/preview/blue-dot-circle-icon-116420329010b2hxeeljn.png';
-          }
+          // if (isJobTracked) {
+          //   untrackJob({ title: jobTitle, location, datePosted });
+          //   console.log('Icon clicked! Job untracked.');
+          //   icon.src = 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png';
+          // } else {
+          //   trackJob({ title: jobTitle, location, datePosted });
+          //   console.log('Icon clicked! Job tracked.');
+          //   icon.src = 'https://toppng.com/uploads/preview/blue-dot-circle-icon-116420329010b2hxeeljn.png';
+          // }
 
           // Update trackedJobs and store in localStorage
           const updatedTrackedJobs = getTrackedJobs();
