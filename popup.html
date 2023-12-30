@@ -1,19 +1,22 @@
-<!-- popup.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Tracker</title>
-    <style>
-        /* Your existing styles here */
-    </style>
+    <link rel="stylesheet" href="popup.css"> <!-- Link to external CSS file -->
 </head>
 <body>
-    <button id="trackButton">Track Job</button>
-    <button id="viewTrackedJobsButton">View Tracked Jobs</button>
-    <button id="clearTrackedJobsButton">Clear Tracked Jobs</button>
+    <div class="blur-container"></div>
+
+    <div class="content-container">
+        <!-- Add Buy Me a Coffee link -->
+        <a href="https://www.buymeacoffee.com/anikettikariha" target="_blank">
+            <img src="https://i0.wp.com/www.naijafund.com/wp-content/uploads/2021/01/coffee.png" alt="Buy Me a Coffee" class="centered-icon">
+        </a>
+
+        <button id="clearTrackedJobsButton">Clear Tracked Jobs</button>
+    </div>
 
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="popup.js"></script>
