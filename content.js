@@ -46,7 +46,6 @@ function untrackJob(job) {
 
 function createTrackingIcon(jobTitle, location, datePosted, isJobTracked) {
   const icon = document.createElement('img');
-  icon.src = 'https://upload.wikimedia.org/wikipedia/commons/2/2d/Basic_green_dot.png';
   icon.alt = 'Track Job';
   icon.classList.add('centered-icon');
   icon.style.cursor = 'pointer';
@@ -54,8 +53,37 @@ function createTrackingIcon(jobTitle, location, datePosted, isJobTracked) {
   // Set color for tracked or untracked state
   icon.style.filter = isJobTracked ? 'grayscale(100%)' : ''; // Swap colors
 
+  // Change the image source based on the tracking state
+  icon.src = isJobTracked
+    ? 'https://toppng.com/uploads/preview/blue-dot-circle-icon-116420329010b2hxeeljn.png'
+    : 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png';
+
+  icon.addEventListener('click', () => {
+    // Toggle the tracking state
+    if (isJobTracked) {
+      untrackJob({ title: jobTitle, location, datePosted });
+      console.log('Icon clicked! Job untracked.');
+    } else {
+      trackJob({ title: jobTitle, location, datePosted });
+      console.log('Icon clicked! Job tracked.');
+    }
+
+    // Update the tracking state for the next click
+    isJobTracked = !isJobTracked;
+
+    // Change the image source dynamically after the click event
+    icon.src = isJobTracked
+      ? 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png'
+      : 'https://toppng.com/uploads/preview/blue-dot-circle-icon-116420329010b2hxeeljn.png';
+
+    // Update the grayscale filter based on the new tracking state
+    icon.style.filter = isJobTracked ? 'grayscale(100%)' : '';
+  });
+
   return icon;
 }
+
+
 function applyTrackingIcons() {
   const jobTable = findJobTable();
   if (!jobTable) {
@@ -88,23 +116,25 @@ function applyTrackingIcons() {
         const icon = createTrackingIcon(jobTitle, location, datePosted, isJobTracked);
         jobRow.appendChild(icon);
 
-        // Update icon color after the state change
-        icon.style.filter = isJobTracked ? 'grayscale(100%)' : ''; // Swap colors
-
         icon.addEventListener('click', () => {
           // Toggle the tracking state
           if (isJobTracked) {
             untrackJob({ title: jobTitle, location, datePosted });
             console.log('Icon clicked! Job untracked.');
+       
+            icon.src = 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png';
+ 
+            
           } else {
             trackJob({ title: jobTitle, location, datePosted });
             console.log('Icon clicked! Job tracked.');
+            icon.src = 'https://toppng.com/uploads/preview/blue-dot-circle-icon-116420329010b2hxeeljn.png';
           }
 
           // Update trackedJobs and store in localStorage
           const updatedTrackedJobs = getTrackedJobs();
           const existingJobIndex = updatedTrackedJobs.findIndex(job => job.title === jobTitle && job.location === location);
-
+          
           if (existingJobIndex !== -1) {
             updatedTrackedJobs.splice(existingJobIndex, 1);
           } else {
