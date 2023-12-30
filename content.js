@@ -67,16 +67,18 @@ function createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTr
     // Update the tracking state for the next click
     if (isJobTracked) {
       const currentDate = new Date();
-      formattedDate = `${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      const formattedDate = `${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      })}`;
       trackJob({ title: jobTitle, location, datePosted, trackedDate: formattedDate });
       console.log('Icon clicked! Job tracked.');
+      updateTrackingInfo(jobTitle, location, datePosted, formattedDate, isJobTracked, jobRow);
     } else {
       untrackJob({ title: jobTitle, location, datePosted });
       console.log('Icon clicked! Job untracked.');
+      updateTrackingInfo(jobTitle, location, datePosted, '', isJobTracked, jobRow);
     }
-
-    // Update the tracking information immediately
-    updateTrackingInfo(jobTitle, location, datePosted, formattedDate, isJobTracked, jobRow);
   });
 
   iconContainer.appendChild(icon);
@@ -89,7 +91,6 @@ function createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTr
 
   return iconContainer;
 }
-
 
 function applyTrackingIcons() {
   const jobTable = findJobTable();
@@ -138,34 +139,50 @@ function applyTrackingIcons() {
   });
 }
 
-// Function to update tracking information immediately
+// Update tracking information in the UI immediately
 function updateTrackingInfo(jobTitle, location, datePosted, trackedDate, isJobTracked, jobRow) {
-  const titleElement = jobRow.querySelector('td:nth-child(2)');
-  const locationElement = jobRow.querySelector('td:nth-child(3)');
+  const iconContainer = jobRow.querySelector('.icon-container');
+  if (iconContainer) {
+    const trackedDateElement = iconContainer.querySelector('.tracked-date');
+    const icon = iconContainer.querySelector('img');
 
-  const title = titleElement?.innerText || 'N/A';
-  const loc = locationElement?.innerText || 'N/A';
+    // Set color for tracked or untracked state
+    icon.style.filter = isJobTracked ? '' : 'grayscale(100%)';
 
-  if (title === jobTitle && loc === location) {
-    const iconContainer = jobRow.querySelector('.icon-container');
-    if (iconContainer) {
-      const icon = iconContainer.querySelector('img');
-      const trackedDateElement = iconContainer.querySelector('.tracked-date');
+    // Change the image source based on the tracking state
+    icon.src = isJobTracked
+      ? 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png'
+      : 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png'; // Adjust the source URLs as needed
 
-      if (icon && trackedDateElement) {
-        // Set color for tracked or untracked state
-        icon.style.filter = isJobTracked ? '' : 'grayscale(100%)';
+    // Update trackedDate information
+    trackedDateElement.innerText = trackedDate || '';
+  }
 
-        // Change the image source based on the tracking state
-        icon.src = isJobTracked
-          ? 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png'
-          : 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png'; // Adjust the source URLs as needed
+  // Update local storage
+  const updatedTrackedJobs = getTrackedJobs();
+  const existingJobIndex = updatedTrackedJobs.findIndex(
+    job => job.title === jobTitle && job.location === location
+  );
 
-        // Update trackedDate information
-        trackedDateElement.innerText = trackedDate || '';
-      }
+  if (isJobTracked) {
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    })}`;
+
+    if (existingJobIndex !== -1) {
+      updatedTrackedJobs[existingJobIndex].trackedDate = formattedDate;
+    } else {
+      updatedTrackedJobs.push({ title: jobTitle, location, datePosted, trackedDate: formattedDate });
+    }
+  } else {
+    if (existingJobIndex !== -1) {
+      updatedTrackedJobs.splice(existingJobIndex, 1);
     }
   }
+
+  localStorage.setItem('trackedJobs', JSON.stringify(updatedTrackedJobs));
 }
 
 // Apply tracking icons when the content script is loaded
