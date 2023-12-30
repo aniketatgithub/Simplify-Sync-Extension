@@ -191,11 +191,14 @@ applyTrackingIcons();
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.action === 'clearTrackedJobs') {
     clearTrackedJobs();
+    console.log('Message received: clearTrackedJobs');
     sendResponse({ success: true }); // Send a response indicating success
   }
 });
 
+
 function clearTrackedJobs() {
+  console.log('Clear tracked jobs function called.');
   // Clear tracked jobs data from localStorage
   localStorage.removeItem('trackedJobs');
   console.log('Tracked jobs cleared.');
