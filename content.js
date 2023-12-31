@@ -24,11 +24,11 @@ function findJobTable() {
       ) {
         // Add two more columns
         const appliedHeader = document.createElement('th');
-        appliedHeader.innerText = 'Applied';
+        appliedHeader.innerText = 'Date Applied';
         headers[headers.length - 1].insertAdjacentElement('afterend', appliedHeader);
 
         const dateAppliedHeader = document.createElement('th');
-        dateAppliedHeader.innerText = 'Date Applied';
+        dateAppliedHeader.innerText = 'Applied';
         headers[headers.length - 1].insertAdjacentElement('afterend', dateAppliedHeader);
 
         // Apply styles to the table
@@ -81,9 +81,15 @@ function untrackJob(job) {
 }
 
 // Function to create tracking icons for jobs
+// Function to create tracking icons for jobs
 function createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTracked, jobRow) {
-  const iconContainer = document.createElement('div');
+  // Icon container
+  const iconContainer = document.createElement('td');
   iconContainer.classList.add('icon-container');
+
+  // Image container
+  const imageContainer = document.createElement('div');
+  imageContainer.classList.add('image-container');
 
   const icon = document.createElement('img');
   icon.alt = 'Track Job';
@@ -124,22 +130,26 @@ function createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTr
     }
   });
 
-  iconContainer.appendChild(icon);
+  imageContainer.appendChild(icon);
 
-  // Append applied information to the row
-  const appliedElement = document.createElement('div');
-  appliedElement.innerText = isJobTracked ? 'Yes' : 'No';
-  appliedElement.classList.add('applied');
-  iconContainer.appendChild(appliedElement);
+  // Append image container to the icon container
+  iconContainer.appendChild(imageContainer);
 
-  // Append trackedDate information to the row
+  // Date string container
+  const dateStringContainer = document.createElement('td');
+  dateStringContainer.classList.add('date-string-container');
+
+  // Append trackedDate information to the date string container
   const trackedDateElement = document.createElement('div');
   trackedDateElement.innerText = trackedDate ? formatDate(trackedDate) : '';
   trackedDateElement.classList.add('tracked-date');
-  iconContainer.appendChild(trackedDateElement);
+  dateStringContainer.appendChild(trackedDateElement);
 
-  return iconContainer;
+  // Append both containers to the job row
+  jobRow.appendChild(iconContainer);
+  jobRow.appendChild(dateStringContainer);
 }
+
 
 // Function to apply tracking icons to job rows
 function applyTrackingIcons() {
@@ -174,8 +184,7 @@ function applyTrackingIcons() {
         const isJobTracked = !!trackedJob;
         const trackedDate = trackedJob ? trackedJob.trackedDate : null;
 
-        const icon = createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTracked, jobRow);
-        jobRow.appendChild(icon);
+        createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTracked, jobRow);
 
         // Unobserve the row once the icon is added
         observer.unobserve(jobRow);
@@ -192,9 +201,11 @@ function applyTrackingIcons() {
 // Function to update tracking information in the UI immediately
 function updateTrackingInfo(jobTitle, location, datePosted, trackedDate, isJobTracked, jobRow) {
   const iconContainer = jobRow.querySelector('.icon-container');
-  if (iconContainer) {
-    const appliedElement = iconContainer.querySelector('.applied');
-    const trackedDateElement = iconContainer.querySelector('.tracked-date');
+  const textContainer = jobRow.querySelector('.text-container');
+
+  if (iconContainer && textContainer) {
+    const appliedElement = textContainer.querySelector('.applied');
+    const trackedDateElement = textContainer.querySelector('.tracked-date');
     const icon = iconContainer.querySelector('img');
 
     // Set color for tracked or untracked state
@@ -293,15 +304,26 @@ const styles = `
     display: block;
   }
 
-  .icon-container {
+.icon-container {
+    height: 100px;
+    width: 100%;
+    border: none;
     display: flex;
     align-items: center;
+}
+
+
+  .image-container img {
+    border : 0px;
+    height : 100%;
+    width:60px;
+   margin-left : 10px;
+    /* You can add additional styles for the image container here */
   }
 
-  .icon-container img {
-    margin-right: 2px; /* 2px border between icons and date+time */
-    flex: 1; /* Allow the image to grow within the container */
-    object-fit: contain; /* Maintain aspect ratio while filling the container */
+  .text-container {
+    margin-left: 100px; /* Adjust the margin for the text container */
+    /* You can add additional styles for the text container here */
   }
 
   .applied {
@@ -309,7 +331,7 @@ const styles = `
   }
 
   .tracked-date {
-    font-size: 12px; /* Adjust the font size as needed */
+    font-size: 14px; /* Adjust the font size as needed */
   }
 `;
 
