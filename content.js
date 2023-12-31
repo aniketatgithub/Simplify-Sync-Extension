@@ -302,13 +302,23 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   }
 });
 
-// Function to clear tracked jobs
 function clearTrackedJobs() {
   console.log('Clear tracked jobs function called.');
   // Clear tracked jobs data from localStorage
   localStorage.removeItem('trackedJobs');
   console.log('Tracked jobs cleared.');
+
+  // Reload the page
+  location.reload();
+
+  // Trigger a message indicating that tracked jobs have been cleared
+  chrome.runtime.sendMessage({ action: 'trackedJobsCleared' });
 }
+
+
+
+
+
 
 // Add the following styles at the end of your content.js file
 

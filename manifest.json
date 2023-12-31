@@ -2,14 +2,14 @@
 
 {
   "manifest_version": 3,
-  "name": "Job Tracker",
+  "name": "Simplify Sync",
   "version": "1.0",
   "description": "Track job postings",
   "action": {
     "default_icon": {
-      "16": "JobSync-logos_white.png",
-      "48": "JobSync-logos_white.png",
-      "128": "JobSync-logos_white.png"
+      "16": "q.png",
+      "48":"q.png",
+      "128": "q.png"
     },
     "default_popup": "popup.html"
   },
