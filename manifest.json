@@ -13,6 +13,9 @@
     },
     "default_popup": "popup.html"
   },
+  "icons" : {
+    "128": "q.png"
+  },
   "content_scripts": [
     {
       "matches": ["https://github.com/SimplifyJobs/Summer2024-Internships*"],
