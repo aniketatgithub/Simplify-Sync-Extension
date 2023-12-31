@@ -82,6 +82,8 @@ function untrackJob(job) {
 
 // Function to create tracking icons for jobs
 // Function to create tracking icons for jobs
+// Function to create tracking icons for jobs
+// Function to create tracking icons for jobs
 function createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTracked, jobRow) {
   // Icon container
   const iconContainer = document.createElement('td');
@@ -106,6 +108,10 @@ function createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTr
   // Change the image source based on the tracking state
   icon.src = 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png';
 
+  // Date string container
+  const dateStringContainer = document.createElement('td');
+  dateStringContainer.classList.add('date-string-container');
+
   icon.addEventListener('click', () => {
     // Toggle the tracking state
     isJobTracked = !isJobTracked;
@@ -122,11 +128,17 @@ function createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTr
       })}`;
       trackJob({ title: jobTitle, location, datePosted, trackedDate: formattedDate });
       console.log('Icon clicked! Job tracked.');
-      updateTrackingInfo(jobTitle, location, datePosted, formattedDate, isJobTracked, jobRow);
+      updateTrackingInfo(jobTitle, location, datePosted, formattedDate, isJobTracked, jobRow, dateStringContainer);
+
+      // Make the date string container visible when the job is tracked
+      dateStringContainer.style.display = '';
     } else {
       untrackJob({ title: jobTitle, location, datePosted });
       console.log('Icon clicked! Job untracked.');
-      updateTrackingInfo(jobTitle, location, datePosted, '', isJobTracked, jobRow);
+      updateTrackingInfo(jobTitle, location, datePosted, '', isJobTracked, jobRow, dateStringContainer);
+
+      // Hide the date string container when the job is untracked
+      dateStringContainer.style.display = 'none';
     }
   });
 
@@ -134,10 +146,6 @@ function createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTr
 
   // Append image container to the icon container
   iconContainer.appendChild(imageContainer);
-
-  // Date string container
-  const dateStringContainer = document.createElement('td');
-  dateStringContainer.classList.add('date-string-container');
 
   // Append trackedDate information to the date string container
   const trackedDateElement = document.createElement('div');
@@ -149,7 +157,6 @@ function createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTr
   jobRow.appendChild(iconContainer);
   jobRow.appendChild(dateStringContainer);
 }
-
 
 // Function to apply tracking icons to job rows
 function applyTrackingIcons() {
@@ -185,7 +192,6 @@ function applyTrackingIcons() {
         const trackedDate = trackedJob ? trackedJob.trackedDate : null;
 
         createTrackingIcon(jobTitle, location, datePosted, trackedDate, isJobTracked, jobRow);
-
         // Unobserve the row once the icon is added
         observer.unobserve(jobRow);
       }
@@ -198,57 +204,67 @@ function applyTrackingIcons() {
   });
 }
 
-// Function to update tracking information in the UI immediately
-function updateTrackingInfo(jobTitle, location, datePosted, trackedDate, isJobTracked, jobRow) {
+function updateTrackingInfo(jobTitle, location, datePosted, trackedDate, isJobTracked, jobRow, dateStringContainer) {
   const iconContainer = jobRow.querySelector('.icon-container');
-  const textContainer = jobRow.querySelector('.text-container');
 
-  if (iconContainer && textContainer) {
-    const appliedElement = textContainer.querySelector('.applied');
-    const trackedDateElement = textContainer.querySelector('.tracked-date');
+  if (iconContainer && dateStringContainer) {
     const icon = iconContainer.querySelector('img');
+    const trackedDateElement = dateStringContainer.querySelector('.tracked-date');
 
-    // Set color for tracked or untracked state
-    icon.style.filter = isJobTracked ? '' : 'grayscale(100%)';
+    if (icon && trackedDateElement) {
+      // Set color for tracked or untracked state
+      icon.style.filter = isJobTracked ? '' : 'grayscale(100%)';
 
-    // Change the image source based on the tracking state
-    icon.src = isJobTracked
-      ? 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png'
-      : 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png'; // Adjust the source URLs as needed
+      // Change the image source based on the tracking state
+      icon.src = isJobTracked
+        ? 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png'
+        : 'https://miro.medium.com/v2/resize:fit:512/1*nZ9VwHTLxAfNCuCjYAkajg.png'; // Adjust the source URLs as needed
 
-    // Update applied information
-    appliedElement.innerText = isJobTracked ? 'Yes' : 'No';
+      // Update trackedDate information
+      trackedDateElement.innerText = trackedDate ? formatDate(trackedDate) : '';
 
-    // Update trackedDate information
-    trackedDateElement.innerText = trackedDate ? formatDate(trackedDate) : '';
-  }
+      // Update "Date Applied" column
+      const dateAppliedElement = dateStringContainer.querySelector('.date-applied');
+      if (dateAppliedElement) {
+        const currentDate = new Date();
+        dateAppliedElement.innerText = isJobTracked ? formatDate(currentDate) : '';
+      }
 
-  // Update local storage
-  const updatedTrackedJobs = getTrackedJobs();
-  const existingJobIndex = updatedTrackedJobs.findIndex(
-    job => job.title === jobTitle && job.location === location
-  );
+      // Update local storage
+      const updatedTrackedJobs = getTrackedJobs();
+      const existingJobIndex = updatedTrackedJobs.findIndex(
+        job => job.title === jobTitle && job.location === location
+      );
 
-  if (isJobTracked) {
-    const currentDate = new Date();
-    const formattedDate = formatDate(`${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    })}`);
+      if (isJobTracked) {
+        const formattedDate = formatDate(new Date());
+        if (existingJobIndex !== -1) {
+          updatedTrackedJobs[existingJobIndex].trackedDate = formattedDate;
+        } else {
+          updatedTrackedJobs.push({ title: jobTitle, location, datePosted, trackedDate: formattedDate });
+        }
 
-    if (existingJobIndex !== -1) {
-      updatedTrackedJobs[existingJobIndex].trackedDate = formattedDate;
-    } else {
-      updatedTrackedJobs.push({ title: jobTitle, location, datePosted, trackedDate: formattedDate });
+        // Remove the "date-string-container" class
+        dateStringContainer.classList.remove('date-string-container');
+      } else {
+        if (existingJobIndex !== -1) {
+          updatedTrackedJobs.splice(existingJobIndex, 1);
+        }
+
+        // Add the "date-string-container" class back
+        dateStringContainer.classList.add('date-string-container');
+      }
+
+      localStorage.setItem('trackedJobs', JSON.stringify(updatedTrackedJobs));
     }
-  } else {
-    if (existingJobIndex !== -1) {
-      updatedTrackedJobs.splice(existingJobIndex, 1);
-    }
   }
-
-  localStorage.setItem('trackedJobs', JSON.stringify(updatedTrackedJobs));
 }
+
+
+
+
+
+
 
 // Function to format date without the year and time
 function formatDate(dateTimeString) {
