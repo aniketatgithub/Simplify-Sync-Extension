@@ -323,42 +323,47 @@ function clearTrackedJobs() {
 // Add the following styles at the end of your content.js file
 
 const styles = `
-  .centered-icon {
-    width: 20px; /* Set a fixed width for consistency */
-    height: 20px; /* Set a fixed height for consistency */
-    margin: auto;
-    display: block;
-  }
-
-.icon-container {
-    height: 100px;
-    width: 100%;
-    border: none;
-    display: flex;
-    align-items: center;
+/* Add this style for the hover effect */
+.image-container:hover img {
+  transform: scale(1.1); /* Adjust the scale factor as needed */
+  transition: transform 0.3s ease; /* Add a smooth transition effect */
 }
 
+/* Existing styles */
+.centered-icon {
+  width: 20px;
+  height: 20px;
+  margin: auto;
+  display: block;
+}
 
-  .image-container img {
-    border : 0px;
-    height : 100%;
-    width:60px;
-   margin-left : 10px;
-    /* You can add additional styles for the image container here */
-  }
+.icon-container {
+  height: 100px;
+  width: 100%;
+  border: none;
+  display: flex;
+  align-items: center;
+}
 
-  .text-container {
-    margin-left: 100px; /* Adjust the margin for the text container */
-    /* You can add additional styles for the text container here */
-  }
+.image-container img {
+  border: 0px;
+  height: 100%;
+  width: 60px;
+  margin-left: 10px;
+}
 
-  .applied {
-    font-size: 12px; /* Adjust the font size as needed */
-  }
+.text-container {
+  margin-left: 100px;
+}
 
-  .tracked-date {
-    font-size: 14px; /* Adjust the font size as needed */
-  }
+.applied {
+  font-size: 12px;
+}
+
+.tracked-date {
+  font-size: 14px;
+}
+
 `;
 
 const styleElement = document.createElement('style');
