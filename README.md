@@ -22,10 +22,6 @@ Get Simplify Sync on the [Chrome Web Store](https://chromewebstore.google.com/de
 
 We welcome contributions! Feel free to raise issues, contribute features, or report bugs on our [GitHub repository](https://github.com/SimplifyJobs/Summer2024-Internships).
 
-## Support
-
-If you encounter any issues or have questions, please reach out to us via [GitHub Issues](https://github.com/SimplifyJobs/Summer2024-Internships/issues).
-
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
